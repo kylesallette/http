@@ -37,7 +37,6 @@ class Server
 
   def headers
     loop do
-
     client = tcp_server.accept
     while line = client.gets and !line.chomp.empty?
       @request_lines << line.chomp

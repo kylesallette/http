@@ -7,13 +7,17 @@ class Server
   attr_reader :tcp_server,
               :request,
               :request_lines,
-              :client
+              :client,
+              :shutdown,
+              :search_word
 
   def initialize
     @tcp_server = TCPServer.new(9292)
     @request = 0
     @request_lines = []
     @client = client
+    @shutdown = false
+    @search_word = search_word
   end
 
   def outputting_diagnostics
@@ -23,9 +27,8 @@ class Server
     host = request_lines[1].split(":")[1]
     port = request_lines[1].split(":")[2]
     accept = request_lines[6].split(":")[1].gsub(" ", "")
-    binding.pry
 
-   "<pre>
+  "<pre>
     Verb: #{verb}
     Path: #{path}
     Protocol: #{protocol}
@@ -37,28 +40,47 @@ class Server
   end
 
   def path
-#    if request_lines[0].split(" ")[1].include?("/")
-#      outputting_diagnostics
-#    elsif request_lines[0].split(" ")[1].include?("/Hello")
-#      hello_world
-     if request_lines[0].split(" ")[1].include?("/datetime")
-        Time.now.strftime("%d/%m/%Y %H:%M")
+    if request_lines[0].split(" ")[1] == "/"
+      outputting_diagnostics
+    elsif request_lines[0].split(" ")[1] == "/hello"
+      hello_world
+     elsif request_lines[0].split(" ")[1] == "/datetime"
+        Time.now.strftime("%l:%M%p on %A, %^B %-d, %Y ")
+     elsif request_lines[0].split(" ")[1] == "/shutdown"
+       shutdown
+     elsif request_lines[0].split(" ")[1].include? "/word_search"
+        @search_word = request_lines[0].split(" ")[1].split("=")[1]
+        word_search
+     end
+  end
 
+  def hello_world
+    response = "Hello World"
+    response + " " + request.to_s
+  end
+
+  def word_search
+    dic_words = []
+    File.readlines("/usr/share/dict/words").each do |words|
+      dic_words << words.chomp
+    end
+    if dic_words.include?(search_word)
+      "WORD is a known word"
+    else
+      "WORD is not a known word"
     end
   end
 
-#  def hello_world
-
-#    response = "Hello World"
-#    output = "<html><head></head><body>#{response + " " + request.to_s}</body></html>"
-#    @client.puts output
-#    @request += 1
-#  end
-
+  def shutdown
+    total = "Total Requests: #{request}"
+    @shutdown = true
+    total
+  end
 
   def headers
-    loop do
+    until @shutdown == true
     @client = tcp_server.accept
+    @request_lines = Array.new
     while line = client.gets and !line.chomp.empty?
       @request_lines << line.chomp
     end

@@ -57,11 +57,12 @@ class Server
       shutdown_server
     elsif request_lines[0].split(" ")[1].include? "/word_search"
       searching_for_word
-    elsif request_lines[0].split(" ")[1].include? "/start_game"
+    elsif request_lines[0].split(" ")[1].include? "/start_game" then request_lines[0].split(" ")[0] == "POST"
       @game = GameServer.new
       @game.start_game
-    elsif request_lines[0].split(" ")[1].include? "/game"
-      @game = GameServer.new
+    elsif request_lines[0].split(" ")[0] == "POST" then request_lines[0].split(" ")[1] == "/game"
+      @game.checking_what_path(request_lines, client)
+    elsif request_lines[0].split(" ")[1] == "/game" then request_lines[0].split(" ")[0] == "GET"
       @game.how_many_guesses
     end
   end
@@ -110,3 +111,5 @@ class Server
   end
 
 end
+server = Server.new
+server.start

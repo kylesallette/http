@@ -1,8 +1,9 @@
 require 'faraday'
 require 'minitest/pride'
 require 'minitest/autorun'
-require './lib/server.rb'
-
+require './lib/server'
+require './lib/word_search'
+require './lib/game_server'
 
 class ServerTest < Minitest::Test
 
@@ -12,9 +13,4 @@ class ServerTest < Minitest::Test
     assert_instance_of Server, server
   end
 
-  def test_something
-    conn = Faraday.new(url: "localhost:9292")
-    server = Server.new
-    expected = conn.get/
-     assert_equal expected server.headers
-  end
+end

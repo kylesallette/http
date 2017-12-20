@@ -52,13 +52,11 @@ class Server
     elsif request_lines[0].split(" ")[1] == "/hello"
       hello_world
     elsif request_lines[0].split(" ")[1] == "/datetime"
-      Time.now.strftime("%l:%M%p on %A, %^B %-d, %Y ")
+      time
     elsif request_lines[0].split(" ")[1] == "/shutdown"
-      shutdown
+      shutdown_server
     elsif request_lines[0].split(" ")[1].include? "/word_search"
-      @search_word = request_lines[0].split(" ")[1].split("=")[1]
-      word = WordSearch.new
-      word.word_search(search_word)
+      searching_for_word
     elsif request_lines[0].split(" ")[1].include? "/start_game"
       @game = GameServer.new
       @game.start_game
@@ -68,19 +66,29 @@ class Server
     end
   end
 
- def hello_world
+  def hello_world
     @hello_num += 1
     response = "Hello World"
-    response + " " + hello_num.to_s
+    response + " " + hello_num.to_s + "\n" + outputting_diagnostics
   end
 
-  def shutdown
+  def searching_for_word
+    @search_word = request_lines[0].split(" ")[1].split("=")[1]
+    word = WordSearch.new
+    word.word_search(search_word) + "\n" + outputting_diagnostics
+  end
+
+  def time
+    Time.now.strftime("%l:%M%p on %A, %^B %-d, %Y ") + "\n" + outputting_diagnostics
+  end
+
+  def shutdown_server
     total = "Total Requests: #{request}"
     @shutdown = true
-    total
+    total + "\n" + outputting_diagnostics
   end
 
-  def headers
+  def start
     until @shutdown == true
     @client = tcp_server.accept
     @request_lines = Array.new
@@ -102,5 +110,3 @@ class Server
   end
 
 end
-server = Server.new
-server.headers

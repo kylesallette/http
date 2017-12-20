@@ -1,5 +1,3 @@
-
-
 class GameServer
 
   attr_reader :guesses,
@@ -18,13 +16,13 @@ class GameServer
   def how_many_guesses
     number_of_guesses = @guesses.count
     if number_of_guesses == 0
-      yeah_man = "you haven't guessed anything. Can't tell you how low or how high."
+      response = "you haven't guessed anything. Can't tell you how low or how high."
     elsif @guesses.last.to_i > @number
-      yeah_ man = "your last guess was to high."
+      response = "your last guess was to high."
     else
-      yeah_man = "your last guess was to low."
+      response = "your last guess was to low."
     end
-    "you have made #{number_of_guesses} guesses and #{yeah_man} ."
+  "you have made #{number_of_guesses} guesses and #{response} ."
   end
 
 end

@@ -1,5 +1,6 @@
 require 'pry'
 require 'socket'
+require './lib/game_server'
 
 
 class Server
@@ -9,7 +10,8 @@ class Server
               :request_lines,
               :client,
               :shutdown,
-              :search_word
+              :search_word,
+              :game
 
   def initialize
     @tcp_server = TCPServer.new(9292)
@@ -18,6 +20,7 @@ class Server
     @client = client
     @shutdown = false
     @search_word = search_word
+    @game = game
   end
 
   def outputting_diagnostics
@@ -26,7 +29,8 @@ class Server
     protocol = request_lines[0].split(" ")[2]
     host = request_lines[1].split(":")[1]
     port = request_lines[1].split(":")[2]
-    accept = request_lines[6].split(":")[1].gsub(" ", "")
+    accept = request_lines.select { |char| char.include?("Accept:")}.join("")
+    accept_1 = accept.split(" ")[1]
 
   "<pre>
     Verb: #{verb}
@@ -35,7 +39,7 @@ class Server
     Host: #{host}
     Port: #{port}
     Origin: #{host}
-    Accept: #{accept}
+    Accept: #{accept_1}
    </pre>"
   end
 
@@ -44,14 +48,20 @@ class Server
       outputting_diagnostics
     elsif request_lines[0].split(" ")[1] == "/hello"
       hello_world
-     elsif request_lines[0].split(" ")[1] == "/datetime"
-        Time.now.strftime("%l:%M%p on %A, %^B %-d, %Y ")
-     elsif request_lines[0].split(" ")[1] == "/shutdown"
-       shutdown
-     elsif request_lines[0].split(" ")[1].include? "/word_search"
-        @search_word = request_lines[0].split(" ")[1].split("=")[1]
-        word_search
-     end
+    elsif request_lines[0].split(" ")[1] == "/datetime"
+      Time.now.strftime("%l:%M%p on %A, %^B %-d, %Y ")
+    elsif request_lines[0].split(" ")[1] == "/shutdown"
+      shutdown
+    elsif request_lines[0].split(" ")[1].include? "/word_search"
+      @search_word = request_lines[0].split(" ")[1].split("=")[1]
+      word_search
+    elsif request_lines[0].split(" ")[1].include? "/start_game"
+      @game = GameServer.new
+      @game.start_game
+    elsif request_lines[0].split(" ")[1].include? "/game"
+      @game = GameServer.new
+      @game.how_many_guesses
+    end
   end
 
   def hello_world
@@ -65,9 +75,9 @@ class Server
       dic_words << words.chomp
     end
     if dic_words.include?(search_word)
-      "WORD is a known word"
+      "#{search_word.capitalize} is a known word"
     else
-      "WORD is not a known word"
+      "#{search_word.capitalize} is not a known word"
     end
   end
 
@@ -99,6 +109,5 @@ class Server
   end
 
 end
-
 server = Server.new
 server.headers

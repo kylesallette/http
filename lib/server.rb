@@ -1,6 +1,7 @@
 require 'pry'
 require 'socket'
 require './lib/game_server'
+require './lib/word_search'
 
 
 class Server
@@ -11,7 +12,8 @@ class Server
               :client,
               :shutdown,
               :search_word,
-              :game
+              :game,
+              :hello_num
 
   def initialize
     @tcp_server = TCPServer.new(9292)
@@ -21,6 +23,7 @@ class Server
     @shutdown = false
     @search_word = search_word
     @game = game
+    @hello_num = 0
   end
 
   def outputting_diagnostics
@@ -54,7 +57,8 @@ class Server
       shutdown
     elsif request_lines[0].split(" ")[1].include? "/word_search"
       @search_word = request_lines[0].split(" ")[1].split("=")[1]
-      word_search
+      word = WordSearch.new
+      word.word_search(search_word)
     elsif request_lines[0].split(" ")[1].include? "/start_game"
       @game = GameServer.new
       @game.start_game
@@ -64,21 +68,10 @@ class Server
     end
   end
 
-  def hello_world
+ def hello_world
+    @hello_num += 1
     response = "Hello World"
-    response + " " + request.to_s
-  end
-
-  def word_search
-    dic_words = []
-    File.readlines("/usr/share/dict/words").each do |words|
-      dic_words << words.chomp
-    end
-    if dic_words.include?(search_word)
-      "#{search_word.capitalize} is a known word"
-    else
-      "#{search_word.capitalize} is not a known word"
-    end
+    response + " " + hello_num.to_s
   end
 
   def shutdown

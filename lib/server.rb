@@ -68,7 +68,6 @@ class Server
       direct = RedirectResponse.new
       direct.redirect_message(request_lines, client, "404 Not Found")
     end
-
   end
 
   def hello_world
@@ -95,24 +94,24 @@ class Server
 
   def start
     until @shutdown == true
-    @client = tcp_server.accept
-    @request_lines = Array.new
-    while line = client.gets and !line.chomp.empty?
-      @request_lines << line.chomp
+      @client = tcp_server.accept
+      @request_lines = Array.new
+      while line = client.gets and !line.chomp.empty?
+        @request_lines << line.chomp
+      end
+      puts "recieved request"
+      output = "<html><head></head><body>#{path}</body></html>"
+      headers = ["http/1.1 200 ok",
+        "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+        "server: ruby",
+        "content-type: text/html; charset=iso-8859-1",
+        "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+        @client.puts headers
+        @client.puts output
+        @request += 1
+        @client.close
+      end
     end
-    puts "recieved request"
-    output = "<html><head></head><body>#{path}</body></html>"
-    headers = ["http/1.1 200 ok",
-          "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-          "server: ruby",
-          "content-type: text/html; charset=iso-8859-1",
-          "content-length: #{output.length}\r\n\r\n"].join("\r\n")
-          @client.puts headers
-          @client.puts output
-          @request += 1
-          @client.close
-    end
-  end
 
 end
 server = Server.new

@@ -35,6 +35,7 @@ class Server
     accept = request_lines.select { |char| char.include?("Accept:")}.join("")
     accept_1 = accept.split(" ")[1]
 
+
   "<pre>
     Verb: #{verb}
     Path: #{path}
@@ -114,5 +115,3 @@ class Server
     end
 
 end
-server = Server.new
-server.start

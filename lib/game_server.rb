@@ -43,7 +43,7 @@ class GameServer
     number = @guess_number.split("\n")[3]
     @guesses << number.strip
     redirect = RedirectResponse.new
-    redirect.redirect_message(request_lines, client)
+    redirect.redirect_message(request_lines, client, "302 Found")
   end
 
 end

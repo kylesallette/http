@@ -64,7 +64,11 @@ class Server
       @game.checking_what_path(request_lines, client)
     elsif request_lines[0].split(" ")[1] == "/game" then request_lines[0].split(" ")[0] == "GET"
       @game.how_many_guesses
+    else
+      direct = RedirectResponse.new
+      direct.redirect_message(request_lines, client, "404 Not Found")
     end
+
   end
 
   def hello_world

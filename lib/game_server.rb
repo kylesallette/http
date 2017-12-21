@@ -14,7 +14,6 @@ class GameServer
     @guess_number = guess_number
   end
 
-
   def start_game
     "Good luck!"
   end

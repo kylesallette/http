@@ -29,14 +29,14 @@ class GameServer
     else
       response = "Your guess was correct!"
     end
-  "you have made #{number_of_guesses} guesses and #{response} ."
+    "you have made #{number_of_guesses} guesses and #{response} ."
   end
 
   def checking_what_path(request_lines, client)
-      count_1 = request_lines.select { |char| char.include?("Content-Length:")}.join("")
-      @count = count_1.split(" ")[1]
-      @guess_number = client.read("#{count}".to_i)
-      split_out_guess(request_lines,client)
+    count_1 = request_lines.select { |char| char.include?("Content-Length:")}.join("")
+    @count = count_1.split(" ")[1]
+    @guess_number = client.read("#{count}".to_i)
+    split_out_guess(request_lines,client)
   end
 
   def split_out_guess(request_lines, client)

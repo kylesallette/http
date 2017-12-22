@@ -3,7 +3,6 @@ require 'socket'
 require './lib/game_server'
 require './lib/word_search'
 
-
 class Server
 
   attr_reader :tcp_server,
@@ -15,15 +14,15 @@ class Server
               :game,
               :hello_num
 
-  def initialize
-    @tcp_server = TCPServer.new(9292)
+ def initialize(port)
+    @game = game
     @request = 0
-    @request_lines = []
+    @hello_num = 0
     @client = client
     @shutdown = false
+    @request_lines = []
     @search_word = search_word
-    @game = game
-    @hello_num = 0
+    @tcp_server = TCPServer.new(port)
   end
 
   def outputting_diagnostics
@@ -34,9 +33,11 @@ class Server
     port = request_lines[1].split(":")[2]
     accept = request_lines.select { |char| char.include?("Accept:")}.join("")
     accept_1 = accept.split(" ")[1]
+    diagnostics_debugging(verb, path, protocol, host, port, accept, accept_1)
+  end
 
-
-  "<pre>
+  def diagnostics_debugging(verb, path, protocol, host, port, accept, accept_1)
+    "<pre>
     Verb: #{verb}
     Path: #{path}
     Protocol: #{protocol}
@@ -44,7 +45,7 @@ class Server
     Port: #{port}
     Origin: #{host}
     Accept: #{accept_1}
-   </pre>"
+    </pre>"
   end
 
   def path
@@ -58,16 +59,22 @@ class Server
       shutdown_server
     elsif request_lines[0].split(" ")[1].include? "/word_search"
       searching_for_word
-    elsif request_lines[0].split(" ")[1].include? "/start_game" then request_lines[0].split(" ")[0] == "POST"
+    else
+      path_checking
+    end
+  end
+
+  def path_checking
+    if request_lines[0].split(" ")[1].include? "/start_game" then request_lines[0].split(" ")[0] == "POST"
       @game = GameServer.new
-      @game.start_game
+      @game.start_game(request_lines, client)
     elsif request_lines[0].split(" ")[0] == "POST" then request_lines[0].split(" ")[1] == "/game"
       @game.checking_what_path(request_lines, client)
     elsif request_lines[0].split(" ")[1] == "/game" then request_lines[0].split(" ")[0] == "GET"
       @game.how_many_guesses
     else
-      direct = RedirectResponse.new
-      direct.redirect_message(request_lines, client, "404 Not Found")
+      @direct = RedirectResponse.new
+      @direct.redirect_message(request_lines, client, "404 Not Found")
     end
   end
 
@@ -88,7 +95,7 @@ class Server
   end
 
   def shutdown_server
-    total = "Total Requests: #{request}"
+    total = "Total Requests: #{request} :server shutting down...."
     @shutdown = true
     total + "\n" + outputting_diagnostics
   end
@@ -103,15 +110,15 @@ class Server
       puts "recieved request"
       output = "<html><head></head><body>#{path}</body></html>"
       headers = ["http/1.1 200 ok",
-        "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
-        "server: ruby",
-        "content-type: text/html; charset=iso-8859-1",
-        "content-length: #{output.length}\r\n\r\n"].join("\r\n")
-        @client.puts headers
-        @client.puts output
-        @request += 1
-        @client.close
-      end
+      "date: #{Time.now.strftime('%a, %e %b %Y %H:%M:%S %z')}",
+      "server: ruby",
+      "content-type: text/html; charset=iso-8859-1",
+      "content-length: #{output.length}\r\n\r\n"].join("\r\n")
+      @client.puts headers
+      @client.puts output
+      @request += 1
+      @client.close
     end
+  end
 
 end

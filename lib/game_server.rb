@@ -9,13 +9,13 @@ class GameServer
 
   def initialize
     @guesses = []
-    @number = rand(0..5)
+    @number = rand(0..100)
     @count = count
     @guess_number = guess_number
   end
 
-  def start_game
-    "Good luck!"
+  def start_game(request_lines, client)
+    "Good Luck!"
   end
 
   def how_many_guesses
@@ -32,6 +32,7 @@ class GameServer
     "you have made #{number_of_guesses} guesses and #{response} ."
   end
 
+
   def checking_what_path(request_lines, client)
     count_1 = request_lines.select { |char| char.include?("Content-Length:")}.join("")
     @count = count_1.split(" ")[1]
@@ -41,7 +42,7 @@ class GameServer
 
   def split_out_guess(request_lines, client)
     number = @guess_number.split("\n")[3]
-    @guesses << number.strip
+    @guesses << number
     redirect = RedirectResponse.new
     redirect.redirect_message(request_lines, client, "302 Found")
   end

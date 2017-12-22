@@ -59,18 +59,10 @@ class ServerTest < Minitest::Test
     assert_equal DATETIME, response.body
   end
 
-
   def test_game_response
     response = Faraday.get "http://127.0.0.1:9292/game"
 
     assert_equal GAME_RESPONSE, response.body
-  end
-
-  def test_guessing_to_game
-    skip
-    response = Faraday.post "http://127.0.0.1:9292/game"
-
-    assert_equal GAME_GUESS, response.body
   end
 
   def test_get_verb
